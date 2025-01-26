@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Página Flask</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-start; /* Alinha os botões à esquerda */
+            gap: 10px; /* Espaçamento entre os botões */
+            margin-top: 20px;
+            width: 80%; /* Alinha com a largura da tabela */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .button {
+            padding: 10px 20px;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 4px;
+        }
+        .button-blue {
+            background-color: #007bff;
+        }
+        .button-green {
+            background-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 90%; max-width: 1200px; margin: auto; padding: 20px; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <h2>Requisições de Uniformes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Selecionar</th>
+                    <th>Nome</th>
+                    <th>Modelo</th>
+                    <th>Cor</th>
+                    <th>Tamanho</th>
+                    <th>Vestuário</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for uniforme in uniformes %}
+                <tr data-id="{{ uniforme[0] }}">
+                    <td><input type="checkbox" class="delete-checkbox"></td>
+                    <td>{{ uniforme[1] }}</td>
+                    <td>{{ uniforme[2] }}</td>
+                    <td>{{ uniforme[3] }}</td>
+                    <td>{{ uniforme[4] }}</td>
+                    <td>{{ uniforme[5] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="button-container">
+            <a href="/uniforme" class="button button-blue">Solicitar Uniforme</a>
+            <button class="button button-green" onclick="deleteSelectedRows()">Deletar Selecionados</button>
+        </div>
+    </div>
+    <script>
+        function deleteSelectedRows() {
+            const checkboxes = document.querySelectorAll('.delete-checkbox');
+            const idsToDelete = [];
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    const row = checkbox.closest('tr');
+                    const id = row.getAttribute('data-id');
+                    idsToDelete.push(id);
+                    row.remove();
+                }
+            });
+
+            if (idsToDelete.length > 0) {
+                fetch('/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ids: idsToDelete })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Linhas deletadas com sucesso');
+                    } else {
+                        console.error('Erro ao deletar linhas');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
